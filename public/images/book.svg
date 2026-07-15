@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="coverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#172554" />
+    </linearGradient>
+    <linearGradient id="pageGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fef9c3" />
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <!-- Glow -->
+  <circle cx="90" cy="90" r="75" fill="url(#glow)" filter="blur(8px)" />
+
+  <!-- Book Pages Stack (서책 속지 단면 레이어) -->
+  <rect x="25" y="35" width="125" height="110" rx="3" fill="url(#pageGrad)" stroke="#b45309" stroke-width="1.5" />
+  <!-- Book Binding Lines (고서 제본 실 묶음 묘사) -->
+  <line x1="28" y1="35" x2="28" y2="145" stroke="#78350f" stroke-width="3" />
+  <line x1="28" y1="45" x2="38" y2="45" stroke="#78350f" stroke-width="2" />
+  <line x1="28" y1="70" x2="38" y2="70" stroke="#78350f" stroke-width="2" />
+  <line x1="28" y1="95" x2="38" y2="95" stroke="#78350f" stroke-width="2" />
+  <line x1="28" y1="120" x2="38" y2="120" stroke="#78350f" stroke-width="2" />
+  <line x1="28" y1="135" x2="38" y2="135" stroke="#78350f" stroke-width="2" />
+
+  <!-- Book Cover (서책 겉표지) -->
+  <rect x="35" y="30" width="120" height="120" rx="4" fill="url(#coverGrad)" stroke="#3b82f6" stroke-width="2.5" />
+
+  <!-- Title Label (서책 제목 표지 딱지) -->
+  <rect x="50" y="45" width="26" height="75" fill="#fff" stroke="#1e293b" stroke-width="1.5" />
+  <!-- Inscription Lines (서책의 가상 제목 세로선) -->
+  <line x1="63" y1="52" x2="63" y2="112" stroke="#1e293b" stroke-width="3.5" stroke-dasharray="8,6" />
+  
+  <!-- Cover Grid Line (고서 격자 문양 선) -->
+  <rect x="42" y="36" width="106" height="108" fill="none" stroke="#1d4ed8" stroke-width="1" stroke-opacity="0.3" />
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b91c1c" />
+      <stop offset="100%" stop-color="#7f1d1d" />
+    </linearGradient>
+    <linearGradient id="swordGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e5e7eb" />
+      <stop offset="100%" stop-color="#9ca3af" />
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <!-- Glow -->
+  <circle cx="90" cy="90" r="75" fill="url(#glow)" filter="blur(8px)" />
+
+  <!-- Shield (방패) -->
+  <path d="M 50,40 
+           L 130,40 
+           C 130,90 120,140 90,160 
+           C 60,140 50,90 50,40 
+           Z" 
+        fill="url(#shieldGrad)" 
+        stroke="#f59e0b" 
+        stroke-width="3" />
+  
+  <!-- Shield Emblem (방패 무늬 - 태극 또는 귀면 문양 형상화) -->
+  <circle cx="90" cy="90" r="22" fill="none" stroke="#fbbf24" stroke-width="2" />
+  <path d="M 90,68 C 105,68 112,90 90,90 C 68,90 75,112 90,112" fill="none" stroke="#fbbf24" stroke-width="3.5" stroke-linecap="round" />
+
+  <!-- Swords Crossed (교차된 칼 2자루) -->
+  <!-- Sword 1 (대각선 왼쪽위 -> 오른쪽아래) -->
+  <g transform="rotate(45, 90, 90)">
+    <!-- Blade -->
+    <path d="M 87,15 L 93,15 L 93,130 L 87,130 Z" fill="url(#swordGrad)" stroke="#4b5563" stroke-width="1" />
+    <!-- Guard (코등이) -->
+    <rect x="80" y="130" width="20" height="6" rx="1.5" fill="#f59e0b" stroke="#b45309" stroke-width="1" />
+    <!-- Hilt (손잡이) -->
+    <rect x="86" y="136" width="8" height="25" fill="#78350f" />
+    <!-- Pommel (칼자루끝) -->
+    <circle cx="90" cy="164" r="5" fill="#f59e0b" />
+  </g>
+
+  <!-- Sword 2 (대각선 오른쪽위 -> 왼쪽아래) -->
+  <g transform="rotate(-45, 90, 90)">
+    <!-- Blade -->
+    <path d="M 87,15 L 93,15 L 93,130 L 87,130 Z" fill="url(#swordGrad)" stroke="#4b5563" stroke-width="1" />
+    <!-- Guard -->
+    <rect x="80" y="130" width="20" height="6" rx="1.5" fill="#f59e0b" stroke="#b45309" stroke-width="1" />
+    <!-- Hilt -->
+    <rect x="86" y="136" width="8" height="25" fill="#78350f" />
+    <!-- Pommel -->
+    <circle cx="90" cy="164" r="5" fill="#f59e0b" />
+  </g>
+</svg>

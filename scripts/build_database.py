@@ -9,14 +9,14 @@ REMOTE_DB_URL = "https://raw.githubusercontent.com/hope9901/teps-exam-note/main/
 TARGET_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "data")
 TARGET_FILE = os.path.join(TARGET_DIR, "mock_questions.json")
 
-# 리퍼러 차단이 없는 안전하고 대중적인 이미지 주소들 (Unsplash & Wikimedia)
-IMG_POTTERY = "https://images.unsplash.com/photo-1580537659444-23adddf29d45?q=80&w=400" # 토기/도자기 묘사 이미지
-IMG_STELE = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400" # 돌 비석 묘사 이미지
-IMG_PAGODA = "https://images.unsplash.com/photo-1542044896530-05d85be9b11a?q=80&w=400" # 한국 전통 불탑/한옥 묘사 이미지
-IMG_MAP = "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=400" # 지도 묘사 이미지
-IMG_PALACE = "https://images.unsplash.com/photo-1533575770077-05272a5cf7b9?q=80&w=400" # 한국 궁궐/기와집 이미지
-IMG_WAR = "https://images.unsplash.com/photo-1490134002822-b073b98a58d6?q=80&w=400" # 전장/말/활 묘사 이미지
-IMG_BOOK = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400" # 역사 서적/기록 고서 이미지
+# 리퍼러 차단이 없는 안전하고 대중적인 이미지 주소들 (로컬 정적 SVG 사용으로 교정)
+IMG_POTTERY = "/images/pottery.svg" # 토기/도자기 묘사 이미지
+IMG_STELE = "/images/stele.svg" # 돌 비석 묘사 이미지
+IMG_PAGODA = "/images/pagoda.svg" # 한국 전통 불탑/한옥 묘사 이미지
+IMG_MAP = "/images/map.svg" # 지도 묘사 이미지
+IMG_PALACE = "/images/palace.svg" # 한국 궁궐/기와집 이미지
+IMG_WAR = "/images/war.svg" # 전장/말/활 묘사 이미지
+IMG_BOOK = "/images/book.svg" # 역사 서적/기록 고서 이미지
 
 # 시대별 실전 한능검 템플릿 라이브러리
 # (76회, 75회 모의고사를 각 50문항씩 꽉 채워 생성하기 위한 개념 템플릿)
