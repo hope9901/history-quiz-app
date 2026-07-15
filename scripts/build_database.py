@@ -2,6 +2,7 @@ import os
 import json
 import urllib.request
 from urllib.error import URLError, HTTPError
+from PIL import Image, ImageOps, ImageEnhance
 
 # 원격 동기화 대상 (사용자가 원격 레포를 개설하여 기출 250문항을 동기화할 때 사용)
 REMOTE_DB_URL = "https://raw.githubusercontent.com/hope9901/teps-exam-note/main/korean_history_5seasons.json"
@@ -23,15 +24,40 @@ REAL_IMAGE_SOURCES = {
     "palace.jpg": "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?q=80&w=600"              # 조선 궁궐 수원 화성 및 한국 전통 기와 처마 실제 사진
 }
 
+def apply_exam_style(image_path):
+    """
+    실물 유물 사진을 실제 한능검 시험지에 인쇄되는 흑백 기출문제 스타일로 가공합니다.
+    - 흑백 Grayscale 변환
+    - 인쇄 대비(Contrast) 증폭
+    - 외곽 검정색 기출문제 삽화용 테두리 박스 합성
+    """
+    try:
+        with Image.open(image_path) as img:
+            # 1. 흑백 이미지(Grayscale) 변환
+            gray_img = img.convert('L')
+            
+            # 2. 시험지 인쇄 특유의 대비 강화 (명암 대비 강화)
+            enhancer = ImageEnhance.Contrast(gray_img)
+            gray_img = enhancer.enhance(1.4)  # 대비 1.4배 증폭
+            
+            # 3. 외곽에 2px 검은색 테두리 박스 장착 (시험지 기출 상자 구현)
+            bordered_img = ImageOps.expand(gray_img, border=2, fill=0)
+            
+            # 4. 덮어쓰기 저장
+            bordered_img.save(image_path, "JPEG")
+            print(f"[+] 시험지 흑백 삽화 스타일 가공 완료: {os.path.basename(image_path)}")
+    except Exception as e:
+        print(f"[!] 이미지 가공 에러: {os.path.basename(image_path)} ({str(e)})")
+
 def download_real_images():
     """
     차단 제약이 없는 Unsplash 사진 CDN으로부터
-    실물 유물 사진 파일들을 다운로드하여 public/images/ 폴더 하위에 로컬 파일로 저장합니다.
+    실물 유물 사진 파일들을 다운로드하고, 즉시 실제 한능검 흑백 기출 시험지 스타일로 가공합니다.
     """
     if not os.path.exists(IMAGES_DIR):
         os.makedirs(IMAGES_DIR)
 
-    print("[*] 한능검 실제 시험 출제용 유물 실물 사진 리소스 다운로드 시작...")
+    print("[*] 한능검 실제 시험지 스타일 출제용 흑백 유물 사진 가공 동기화 시작...")
     
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -40,7 +66,7 @@ def download_real_images():
     for filename, url in REAL_IMAGE_SOURCES.items():
         dest_path = os.path.join(IMAGES_DIR, filename)
         
-        # 무조건 새로 다운로드받도록 기존 캐시 검사 생략 (오염된 위키미디어 에러 파일 덮어쓰기)
+        # 무조건 덮어써서 최신 흑백 시험지 템플릿으로 재생성 처리
         print(f"[*] 다운로드 중: {filename} <- {url}")
         try:
             req = urllib.request.Request(url, headers=headers)
@@ -48,6 +74,10 @@ def download_real_images():
                 with open(dest_path, 'wb') as out_file:
                     out_file.write(response.read())
             print(f"[+] 다운로드 성공: {filename} 저장 완료 (용량: {os.path.getsize(dest_path)} bytes)")
+            
+            # 다운로드 완료 후 즉시 흑백 기출 시험지 이미지 스타일로 가공 적용
+            apply_exam_style(dest_path)
+            
         except Exception as e:
             print(f"[!] 에러: {filename} 다운로드 실패 ({str(e)}).")
 
@@ -120,7 +150,7 @@ TEMPLATES = [
         "imageUrl": IMG_INCENSE,
         "options": [
           "1) 무령왕릉과 금동대향로를 제작하였다.",
-          "2) 석굴암 석굴과 불국사 다보탑을 건립하였다.",
+          "2) 석굴암 석굴 and 불국사 다보탑을 건립하였다.",
           "3) 황룡사 9층 목탑을 자장의 건의로 세웠다.",
           "4) 다보탑과 불국사 삼층석탑을 제작하였다.",
           "5) 미륵사지 석탑을 건립하여 불교의 융성을 도모하였다."
