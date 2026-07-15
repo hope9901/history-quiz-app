@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookMarked, HelpCircle, CheckCircle, Award } from "lucide-react";
+import { BookMarked, HelpCircle, CheckCircle, Award, Info } from "lucide-react";
 
 interface ContentSection {
   title: string;
@@ -261,6 +261,11 @@ export const SummaryNotes: React.FC = () => {
       <div className="summary-banner">
         <BookMarked size={22} />
         <h2>한능검 시대별 핵심 요약집</h2>
+      </div>
+
+      <div className="summary-reference-banner">
+        <Info size={14} className="info-icon" />
+        <span>본 요약본은 <strong>국사편찬위원회 한국사 데이터포털 검정 체계</strong> 및 <strong>EBSi 한국사능력검정시험 개념 교안</strong>을 기준으로 핵심 단권화 정리되었습니다.</span>
       </div>
 
       {/* 시대 네비게이션 탭 */}

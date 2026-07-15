@@ -1975,3 +1975,98 @@ body {
   text-align: justify;
 }
 
+/* 12. 한능검 결과 대시보드 합격 등급 기준표 및 출처 배너 */
+.grading-criteria-panel {
+  grid-column: span 2;
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.2rem;
+  border-radius: var(--border-radius-md);
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .grading-criteria-panel {
+    grid-column: span 1;
+  }
+}
+
+.grading-criteria-panel h4 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 0.75rem;
+}
+
+.criteria-table {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.criteria-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 100px;
+  padding: 0.6rem;
+  background: rgba(10, 11, 16, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-smooth);
+}
+
+.criteria-col.active-1 {
+  border-color: rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.04);
+}
+.criteria-col.active-2 {
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.04);
+}
+.criteria-col.active-3 {
+  border-color: rgba(205, 127, 50, 0.3);
+  background: rgba(205, 127, 50, 0.04);
+}
+
+.c-grade {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.c-score {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* 요약집 공식 출처 배너 */
+.summary-reference-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(6, 182, 212, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--border-radius-md);
+  color: #a5f3fc;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.summary-reference-banner .info-icon {
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.summary-reference-banner strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+

@@ -42,20 +42,20 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
   let feedbackMessage = "아쉽습니다! 기출 개념 정리를 다시 한 번 꼼꼼히 학습해 보세요.";
 
   if (percentageScore >= 80) {
-    passGrade = "1급 합격";
+    passGrade = "1급 (1등급)";
     gradeClass = "grade-1";
     gradeIcon = <Award size={40} className="shine" />;
-    feedbackMessage = "축하합니다! 최고 등급인 1급에 합격하셨습니다! 실전에서도 고득점이 기대됩니다.";
+    feedbackMessage = "축하합니다! 최고 등급인 1급(1등급)에 합격하셨습니다! 실전에서도 고득점이 기대됩니다.";
   } else if (percentageScore >= 70) {
-    passGrade = "2급 합격";
+    passGrade = "2급 (2등급)";
     gradeClass = "grade-2";
     gradeIcon = <Award size={40} />;
-    feedbackMessage = "우수합니다! 2급에 합격하셨습니다. 조금만 더 빈출 오답을 다듬으면 1급도 가능해요!";
+    feedbackMessage = "우수합니다! 2급(2등급)에 합격하셨습니다. 조금만 더 빈출 오답을 다듬으면 1급도 가능해요!";
   } else if (percentageScore >= 60) {
-    passGrade = "3급 합격";
+    passGrade = "3급 (3등급)";
     gradeClass = "grade-3";
     gradeIcon = <ThumbsUp size={40} />;
-    feedbackMessage = "통과했습니다! 3급에 합격하셨습니다. 오답 노트를 통해 취약한 시대를 보강해 보세요.";
+    feedbackMessage = "통과했습니다! 3급(3등급)에 합격하셨습니다. 오답 노트를 통해 취약한 시대를 보강해 보세요.";
   }
 
   // 시대별 통계 분석
@@ -104,6 +104,30 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
             </div>
           </div>
         </div>
+        
+        {/* 한능검 심화 공식 합격 등급 기준표 */}
+        <div className="grading-criteria-panel">
+          <h4>📋 한능검 심화 등급 합격 기준</h4>
+          <div className="criteria-table">
+            <div className="criteria-col active-1">
+              <span className="c-grade">1급 (1등급)</span>
+              <span className="c-score">80점 이상</span>
+            </div>
+            <div className="criteria-col active-2">
+              <span className="c-grade">2급 (2등급)</span>
+              <span className="c-score">70점 ~ 79점</span>
+            </div>
+            <div className="criteria-col active-3">
+              <span className="c-grade">3급 (3등급)</span>
+              <span className="c-score">60점 ~ 69점</span>
+            </div>
+            <div className="criteria-col">
+              <span className="c-grade text-muted">불합격</span>
+              <span className="c-score text-muted">60점 미만</span>
+            </div>
+          </div>
+        </div>
+
         <p className="feedback-message">{feedbackMessage}</p>
       </div>
 
