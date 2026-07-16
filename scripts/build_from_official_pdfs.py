@@ -29,16 +29,13 @@ PDF_DIR = os.environ.get(
 IMAGES_OUT = os.path.join(ROOT, "public", "images", "exams")
 DATA_OUT = os.path.join(ROOT, "src", "data", "official_questions.json")
 
-ROUNDS = ["72", "75", "76", "77"]
+ROUNDS = ["58", "62", "70", "71", "72", "75", "76", "77"]
 CIRCLED = {"①": 1, "②": 2, "③": 3, "④": 4, "⑤": 5}
 
-# 문제지 지면 구조 (729 x 1032 pt, 2단)
-LEFT_COL_X = 43
-RIGHT_COL_X = 374
+# 문제지 지면 구조: 2단 레이아웃이되 회차별 판형이 달라(729x1032 / 748x1091 등)
+# 문항 번호 토큰의 x좌표 클러스터로 단 위치를 자동 감지한다.
 COL_TOL = 5
-LEFT_COL = (36, 364)
-RIGHT_COL = (367, 695)
-PAGE_CONTENT_BOTTOM = 992  # 하단 페이지 번호 제외
+FOOTER_MARGIN = 40  # 하단 페이지 번호 제외 영역
 RENDER_ZOOM = 2.0
 
 
@@ -73,7 +70,41 @@ def parse_answers(path):
     return answers
 
 
-def find_questions(page):
+def _in_span(x, span):
+    return span[0] - COL_TOL <= x <= span[1] + COL_TOL
+
+
+def detect_layout(doc):
+    """문항 번호 토큰의 x좌표를 클러스터링해 좌/우 단의 번호 x범위를 감지한다.
+
+    회차에 따라 번호가 우측 정렬되어 한 자리("1.")와 두 자리("10.") 번호의
+    x가 다르므로, 클러스터는 (min_x, max_x) 스팬으로 다룬다.
+    """
+    from collections import Counter
+    xs = Counter()
+    for page in doc:
+        for w in page.get_text("words"):
+            if re.fullmatch(r"\d{1,2}\.", w[4]) and 1 <= int(w[4][:-1]) <= 50:
+                xs[round(w[0])] += 1
+    # 근접 x값(간격 12pt 이내)끼리 스팬으로 병합 후 빈도 상위 2개 선정
+    clusters = []
+    for x, c in sorted(xs.items()):
+        if clusters and x - clusters[-1]["max"] <= 12:
+            clusters[-1]["max"] = x
+            clusters[-1]["count"] += c
+        else:
+            clusters.append({"min": x, "max": x, "count": c})
+    top2 = sorted(sorted(clusters, key=lambda c: -c["count"])[:2], key=lambda c: c["min"])
+    assert len(top2) == 2, f"2단 레이아웃 감지 실패: {clusters}"
+    left_span = (top2[0]["min"], top2[0]["max"])
+    right_span = (top2[1]["min"], top2[1]["max"])
+    col_w = right_span[0] - left_span[0]
+    left_col = (left_span[0] - 7, right_span[0] - 11)
+    right_col = (right_span[0] - 7, right_span[0] + col_w - 11)
+    return left_span, right_span, left_col, right_col
+
+
+def find_questions(page, left_span, right_span):
     """페이지에서 문항 번호 토큰 위치를 찾아 (번호, 단, y좌표) 목록을 돌려준다."""
     found = []
     for w in page.get_text("words"):
@@ -84,9 +115,9 @@ def find_questions(page):
         if not 1 <= n <= 50:
             continue
         x0, y0 = w[0], w[1]
-        if abs(x0 - LEFT_COL_X) <= COL_TOL:
+        if _in_span(x0, left_span):
             found.append((n, "L", y0))
-        elif abs(x0 - RIGHT_COL_X) <= COL_TOL:
+        elif _in_span(x0, right_span):
             found.append((n, "R", y0))
     return found
 
@@ -94,7 +125,7 @@ def find_questions(page):
 SHARED_HEADER_RE = re.compile(r"^\[?(\d{1,2})\s*[~∼〜]\s*(\d{1,2})\]?$")
 
 
-def find_shared_headers(page):
+def find_shared_headers(page, left_span, right_span):
     """'[47~48] 다음을 읽고 …' 형태의 공동 지문 헤더를 찾는다."""
     headers = []
     for w in page.get_text("words"):
@@ -102,9 +133,9 @@ def find_shared_headers(page):
         if not m:
             continue
         x0, y0 = w[0], w[1]
-        if abs(x0 - LEFT_COL_X) <= COL_TOL:
+        if _in_span(x0, left_span):
             headers.append((int(m.group(1)), int(m.group(2)), "L", y0))
-        elif abs(x0 - RIGHT_COL_X) <= COL_TOL:
+        elif _in_span(x0, right_span):
             headers.append((int(m.group(1)), int(m.group(2)), "R", y0))
     return headers
 
@@ -121,20 +152,22 @@ def crop_questions(exam_pdf, out_dir):
     """
     os.makedirs(out_dir, exist_ok=True)
     doc = fitz.open(exam_pdf)
+    left_span, right_span, left_col, right_col = detect_layout(doc)
     saved = {}
     passages = {}  # 문항번호 → 지문 PIL 이미지
     for page in doc:
-        marks = find_questions(page)
-        headers = find_shared_headers(page)
-        for col_key, (cx0, cx1) in (("L", LEFT_COL), ("R", RIGHT_COL)):
+        page_content_bottom = page.rect.height - FOOTER_MARGIN
+        marks = find_questions(page, left_span, right_span)
+        headers = find_shared_headers(page, left_span, right_span)
+        for col_key, (cx0, cx1) in (("L", left_col), ("R", right_col)):
             col = sorted([m for m in marks if m[1] == col_key], key=lambda m: m[2])
             # 해당 단 내 컨텐츠의 최하단 y (페이지 번호 제외)
             col_words_y = [
                 w[3]
                 for w in page.get_text("words")
-                if cx0 <= w[0] <= cx1 and w[3] < PAGE_CONTENT_BOTTOM
+                if cx0 <= w[0] <= cx1 and w[3] < page_content_bottom
             ]
-            content_bottom = max(col_words_y) if col_words_y else PAGE_CONTENT_BOTTOM
+            content_bottom = max(col_words_y) if col_words_y else page_content_bottom
             # 공동 지문: 헤더 y부터 범위 시작 문항 번호 y 직전까지
             for h_start, h_end, h_col, h_y in headers:
                 if h_col != col_key:
@@ -149,7 +182,7 @@ def crop_questions(exam_pdf, out_dir):
             for i, (n, _, y0) in enumerate(col):
                 y_top = y0 - 8
                 y_bot = (col[i + 1][2] - 10) if i + 1 < len(col) else content_bottom + 8
-                clip = fitz.Rect(cx0, y_top, cx1, min(y_bot, PAGE_CONTENT_BOTTOM))
+                clip = fitz.Rect(cx0, y_top, cx1, min(y_bot, page_content_bottom))
                 img = render_clip(page, clip)
                 if n in passages:
                     p_img = passages[n]

@@ -193,6 +193,22 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
         </div>
       </div>
 
+      {/* 외부 해설 자료 안내 (국사편찬위원회는 공식 해설을 제공하지 않음) */}
+      <div className="external-solutions-box">
+        <AlertCircle size={15} />
+        <span>
+          국사편찬위원회는 기출 해설을 제공하지 않습니다. 상세 해설은{" "}
+          <a href="https://www.comcbt.com/xe/k1" target="_blank" rel="noopener noreferrer">
+            전자문제집 CBT
+          </a>
+          ,{" "}
+          <a href="https://www.ebs.co.kr/pass/examination/history/infomation/problem" target="_blank" rel="noopener noreferrer">
+            EBS 한국사능력시험
+          </a>{" "}
+          등 외부 무료 해설 자료를 참고하세요.
+        </span>
+      </div>
+
       {/* 컨트롤 영역 */}
       <div className="dashboard-actions">
         <button onClick={onRestart} className="btn btn-secondary">
