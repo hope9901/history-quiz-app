@@ -7,8 +7,8 @@
   - 변경금지 조건을 지키기 위해 문항을 텍스트로 재구성하지 않고,
     문제지 원문을 문항 단위 이미지로 잘라 그대로 표시합니다.
 
-지원 회차: 텍스트 레이어가 있는 문제지만 자동 분할 가능 (제72·75·76회 심화).
-제73·74회 문제지는 스캔 이미지 PDF라 자동 분할이 불가능하여 제외합니다.
+지원 회차: 텍스트 레이어가 있는 문제지만 자동 분할 가능 (제72·75·76·77회 심화).
+제73·74·78회 문제지는 스캔 이미지 PDF라 자동 분할이 불가능하여 제외합니다.
 
 사용법: python scripts/build_from_official_pdfs.py
   (PDF는 PDF_DIR에 {회차}_exam.pdf / {회차}_answer.pdf 로 준비)
@@ -29,7 +29,7 @@ PDF_DIR = os.environ.get(
 IMAGES_OUT = os.path.join(ROOT, "public", "images", "exams")
 DATA_OUT = os.path.join(ROOT, "src", "data", "official_questions.json")
 
-ROUNDS = ["72", "75", "76"]
+ROUNDS = ["72", "75", "76", "77"]
 CIRCLED = {"①": 1, "②": 2, "③": 3, "④": 4, "⑤": 5}
 
 # 문제지 지면 구조 (729 x 1032 pt, 2단)
