@@ -144,6 +144,32 @@ body {
   background: rgba(15, 17, 26, 0.9);
 }
 
+.footer-credits {
+  max-width: 860px;
+  margin: 0.75rem auto 0;
+  text-align: left;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.footer-credit-title {
+  font-weight: 700;
+  margin-top: 0.75rem;
+  margin-bottom: 0.15rem;
+}
+
+.footer-credits a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.footer-image-credits {
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
 /* 3. 인트로/웰컴 화면 */
 .intro-container {
   display: flex;

@@ -265,7 +265,7 @@ export const SummaryNotes: React.FC = () => {
 
       <div className="summary-reference-banner">
         <Info size={14} className="info-icon" />
-        <span>본 요약본은 <strong>국사편찬위원회 한국사 데이터포털 검정 체계</strong> 및 <strong>EBSi 한국사능력검정시험 개념 교안</strong>을 기준으로 핵심 단권화 정리되었습니다.</span>
+        <span>본 요약본은 한국사능력검정시험(심화) 출제 범위의 주요 개념을 <strong>자체 정리</strong>한 학습 참고 자료입니다. 정확한 내용은 교과서 및 공인 교재를 함께 확인하세요.</span>
       </div>
 
       {/* 시대 네비게이션 탭 */}

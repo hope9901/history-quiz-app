@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# 공식 기출 PDF 원본 (용량이 커서 커밋 제외 — scripts/build_from_official_pdfs.py 참고)
+scripts/official_pdfs/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

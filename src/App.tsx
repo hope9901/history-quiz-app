@@ -1,5 +1,5 @@
 import { useState } from "react";
-import questionsData from "./data/mock_questions.json";
+import questionsData from "./data/official_questions.json";
 import { ExamTimer } from "./components/ExamTimer";
 import { QuestionCard } from "./components/QuestionCard";
 import { OMRSheet } from "./components/OMRSheet";
@@ -255,7 +255,7 @@ function App() {
                 >
                   {sessions.map((sess) => (
                     <option key={sess} value={sess}>
-                      제{sess}회 기출 모의고사 (심화)
+                      제{sess}회 한국사능력검정시험 기출 (심화)
                     </option>
                   ))}
                 </select>
@@ -398,9 +398,30 @@ function App() {
         )}
       </main>
 
-      {/* 글로벌 푸터 */}
+      {/* 글로벌 푸터: 문항 및 이미지 출처 표기 */}
       <footer className="app-footer">
-        <p>© 2026 한능검 Master. 국사편찬위원회 기출문제를 참고하여 제작된 개인 학습용 프로젝트입니다.</p>
+        <p>© 2026 한능검 Master. 개인 학습용 비영리 프로젝트입니다.</p>
+        <div className="footer-credits">
+          <p className="footer-credit-title">문항 출처</p>
+          <p>
+            본 서비스의 문항은 국사편찬위원회 주관 한국사능력검정시험 제72·75·76회(심화)의{" "}
+            <a href="https://www.historyexam.go.kr/pst/list.do?bbs=dat" target="_blank" rel="noopener noreferrer">
+              공식 홈페이지 시험자료실
+            </a>
+            에서 공개한 문제지·정답표 원문을 변형 없이 문항 단위 이미지로 수록한 것입니다. 기출문제의
+            저작권은 국사편찬위원회에 있으며,{" "}
+            <a href="https://www.kogl.or.kr/info/license.do" target="_blank" rel="noopener noreferrer">
+              공공누리 제4유형(출처표시·상업적 이용금지·변경금지)
+            </a>{" "}
+            조건에 따라 비영리 학습 목적으로만 이용합니다. 문항에 사용된 사진 등의 저작권은
+            원저작자에게 있습니다.
+          </p>
+          <p>
+            ※ 제73·74회는 공개된 문제지가 스캔 이미지 형식이어서 문항 단위 수록이 어려워 제외되었습니다.
+            국사편찬위원회는 기출문제 해설을 제공하지 않으므로, 본 서비스의 정답은 공식 정답표를
+            따르되 해설은 제공되지 않습니다.
+          </p>
+        </div>
       </footer>
     </div>
   );
