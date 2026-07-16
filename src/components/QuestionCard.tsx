@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, CheckCircle2, XCircle, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, XCircle, Info, ZoomIn } from "lucide-react";
+import { ImageLightbox } from "./ImageLightbox";
 
 interface Question {
   id: number;
@@ -36,10 +37,12 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   isReviewMode = false,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [zoomOpen, setZoomOpen] = useState(false);
 
-  // 문제 번호가 변경될 때마다 이미지 에러 상태 초기화
+  // 문제 번호가 변경될 때마다 이미지 에러/확대 상태 초기화
   useEffect(() => {
     setImageError(false);
+    setZoomOpen(false);
   }, [question.id]);
 
   return (
@@ -72,10 +75,18 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         <div className="material-image-box animate-fade-in">
           <img
             src={question.imageUrl}
-            alt="문제 유물 자료"
-            className="question-material-image"
+            alt="문제 지문"
+            className="question-material-image zoomable"
+            onClick={() => setZoomOpen(true)}
             onError={() => setImageError(true)}
           />
+          <button className="zoom-hint-btn" onClick={() => setZoomOpen(true)}>
+            <ZoomIn size={14} />
+            <span>글자가 작으면 눌러서 확대</span>
+          </button>
+          {zoomOpen && (
+            <ImageLightbox src={question.imageUrl} alt="문제 지문 확대" onClose={() => setZoomOpen(false)} />
+          )}
         </div>
       ) : question.imageUrl && imageError ? (
         <div className="material-image-placeholder">

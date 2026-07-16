@@ -484,17 +484,107 @@ body {
 }
 
 .question-material-image {
-  max-width: 100%;
-  max-height: 250px;
+  width: min(100%, 720px);
+  height: auto;
   border-radius: var(--border-radius-md);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   transition: var(--transition-smooth);
 }
 
+.question-material-image.zoomable {
+  cursor: zoom-in;
+}
+
 .question-material-image:hover {
-  transform: scale(1.02);
   border-color: var(--accent-color);
+}
+
+.zoom-hint-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.zoom-hint-btn:hover {
+  color: inherit;
+  border-color: var(--accent-color);
+}
+
+/* 이미지 확대 라이트박스 */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(5, 6, 10, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lightbox-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  flex-shrink: 0;
+}
+
+.lightbox-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+}
+
+.lightbox-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.lightbox-scale {
+  min-width: 56px;
+  text-align: center;
+  color: #fff;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lightbox-scroll {
+  flex: 1;
+  width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  text-align: center;
+}
+
+.lightbox-image {
+  max-width: none;
+  background: #fff;
+  border-radius: 4px;
+  margin: 0 auto;
+  display: block;
+}
+
+.lightbox-hint {
+  flex-shrink: 0;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
 }
 
 .material-image-placeholder {
@@ -2206,3 +2296,81 @@ body {
 }
 
 
+
+/* ─── 모바일 반응형 공통 (640px 이하) ─────────────────────────── */
+@media (max-width: 640px) {
+  .app-header {
+    padding: 0.6rem 0.9rem;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .app-header h1 {
+    font-size: 1.05rem;
+  }
+
+  .header-nav {
+    gap: 0.25rem;
+  }
+
+  .nav-link {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .app-main-content {
+    padding: 1rem 0.75rem;
+  }
+
+  .question-card-container {
+    padding: 1rem 0.85rem;
+  }
+
+  .question-title {
+    font-size: 1.05rem;
+  }
+
+  .question-material-image {
+    width: 100%;
+  }
+
+  .option-item {
+    padding: 0.7rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .summary-tabs {
+    flex-wrap: wrap;
+  }
+
+  .summary-tab-btn {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  .summary-card-detail {
+    padding: 1rem 0.85rem;
+  }
+
+  .intro-hero-section h2 {
+    font-size: 1.25rem;
+  }
+
+  .footer-credits {
+    padding: 0 0.5rem;
+  }
+
+  .dashboard-actions {
+    flex-direction: column;
+  }
+
+  .dashboard-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .lightbox-toolbar button {
+    width: 48px;
+    height: 48px;
+  }
+}

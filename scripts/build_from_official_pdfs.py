@@ -344,19 +344,39 @@ EPOCH_KEYWORDS = {
 
 
 def classify_epoch(text):
-    """문항 텍스트를 키워드 점수로 시대 분류한다. 점수가 없으면 None."""
+    """문항 텍스트를 키워드 점수로 시대 분류한다. (시대 or None, 감지 키워드 목록) 반환."""
     compact = text.replace(" ", "")
     scores = {}
+    hits = {}
     for epoch, kws in EPOCH_KEYWORDS.items():
-        s = 0
-        for kw in kws:
-            if kw.replace(" ", "") in compact:
-                s += 1
-        if s:
-            scores[epoch] = s
+        matched = [kw for kw in kws if kw.replace(" ", "") in compact]
+        if matched:
+            scores[epoch] = len(matched)
+            hits[epoch] = matched
     if not scores:
+        return None, []
+    best = max(scores, key=lambda e: scores[e])
+    return best, hits[best]
+
+
+OPTION_SPLIT_RE = re.compile(r"[①②③④⑤]")
+
+
+def extract_answer_text(text, answer):
+    """문항 텍스트에서 정답 선지(①~⑤)의 원문을 추출한다. 실패 시 None."""
+    if not 1 <= answer <= 5:
         return None
-    return max(scores, key=lambda e: scores[e])
+    parts = OPTION_SPLIT_RE.split(text)
+    # parts[0]은 발문/자료, parts[1..5]가 선지
+    if len(parts) < answer + 1:
+        return None
+    opt = parts[answer].strip()
+    # 다음 선지가 없는 마지막 선지는 꼬리 텍스트가 붙을 수 있어 문장 단위로 자름
+    opt = re.split(r"(?<=[.?!다])\s+(?=[가-힣(])", opt)[0].strip()
+    opt = re.sub(r"\s+", " ", opt)
+    if len(opt) < 5 or len(opt) > 120:
+        return None
+    return opt
 
 
 def interpolate_epochs(epochs):
@@ -455,14 +475,30 @@ def main():
             failed.append(r)
             continue
         # 시대 자동 분류 (키워드 점수 → 시대순 보간)
-        raw_epochs = [classify_epoch(texts.get(n, "")) for n in range(1, 51)]
-        epochs = interpolate_epochs(raw_epochs)
-        classified = sum(1 for e in raw_epochs if e)
+        raw = [classify_epoch(texts.get(n, "")) for n in range(1, 51)]
+        epochs = interpolate_epochs([e for e, _ in raw])
+        keywords_per_q = [kws for _, kws in raw]
+        classified = sum(1 for e, _ in raw if e)
         questions = []
+        ans_text_ok = 0
         for n in range(1, 51):
             a = answers[n]
             epoch = epochs[n - 1]
             circled = ["①", "②", "③", "④", "⑤"]
+            if a["answer"] == 0:
+                explanation = "이 문항은 공식 이의심사 결과 오류로 판정되어 '정답 없음'(응시자 전원 정답)으로 처리되었습니다."
+            else:
+                explanation = f"공식 정답표 기준 정답은 {circled[a['answer']-1]}({a['answer']}번)입니다."
+                ans_text = extract_answer_text(texts.get(n, ""), a["answer"])
+                if ans_text:
+                    ans_text_ok += 1
+                    explanation += f" 정답 선지: “{ans_text}” — 이 문장 자체가 핵심 암기 포인트입니다."
+                explanation += " (국사편찬위원회는 공식 해설을 제공하지 않아, 정답 선지 원문은 문제지에서 자동 추출한 것입니다.)"
+            kws = keywords_per_q[n - 1][:4]
+            note = f"자동 추정 시대: {epoch}"
+            if kws:
+                note += f" | 감지된 핵심 키워드: {', '.join(kws)}"
+            note += f" — [시대별 요약] '{epoch}' 탭의 빈출 선지 포인트와 사료 힌트 매칭표에서 관련 개념을 복습하세요."
             questions.append(
                 {
                     "id": n,
@@ -473,17 +509,13 @@ def main():
                     "imageUrl": f"/images/exams/{r}/q{n:02d}.jpg",
                     "options": [f"{i+1}) {circled[i]}" for i in range(5)],
                     "answer": a["answer"],
-                    "explanation": (
-                        "이 문항은 공식 이의심사 결과 오류로 판정되어 '정답 없음'(응시자 전원 정답)으로 처리되었습니다."
-                        if a["answer"] == 0
-                        else f"공식 정답표 기준 정답은 {circled[a['answer']-1]}({a['answer']}번)입니다. 국사편찬위원회는 기출문제 해설을 제공하지 않으므로, 상세 해설은 EBS 등 공개 강의 자료를 참고하세요."
-                    ),
-                    "summaryNote": f"자동 추정 시대: {epoch} — [시대별 요약] 탭의 '{epoch}' 항목에서 빈출 선지 포인트를 복습하세요.",
+                    "explanation": explanation,
+                    "summaryNote": note,
                 }
             )
         database[r] = questions
         print(f"[+] 제{r}회({mode}): 50문항, 배점 합계 {sum(q['score'] for q in questions)}점, "
-              f"시대 직접 분류 {classified}/50")
+              f"시대 직접 분류 {classified}/50, 정답 선지 추출 {ans_text_ok}/50")
 
     os.makedirs(os.path.dirname(DATA_OUT), exist_ok=True)
     with open(DATA_OUT, "w", encoding="utf-8") as f:
