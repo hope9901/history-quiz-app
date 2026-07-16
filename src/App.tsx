@@ -101,7 +101,8 @@ function App() {
 
     questions.forEach((q) => {
       const myAns = answers[q.id] || null;
-      if (myAns !== q.answer) {
+      // answer === 0 은 공식 이의심사 결과 '전원 정답' 처리된 문항
+      if (q.answer !== 0 && myAns !== q.answer) {
         wrongList.push({
           archiveId: `${selectedSession}_${q.id}_${timestamp}`,
           session: selectedSession,
@@ -172,7 +173,7 @@ function App() {
   const handleStartReview = () => {
     // 첫 오답 찾아서 거기로 인덱스 맞춰둠
     const firstWrongIdx = questions.findIndex(
-      (q) => answers[q.id] !== q.answer
+      (q) => q.answer !== 0 && answers[q.id] !== q.answer
     );
     setCurrentQuestionIndex(firstWrongIdx !== -1 ? firstWrongIdx : 0);
     setActiveTab("REVIEW");
@@ -404,8 +405,8 @@ function App() {
         <div className="footer-credits">
           <p className="footer-credit-title">문항 출처</p>
           <p>
-            본 서비스의 문항은 국사편찬위원회 주관 한국사능력검정시험 8개 회차
-            (제58·62·70·71·72·75·76·77회 심화)의{" "}
+            본 서비스의 문항은 국사편찬위원회 주관 한국사능력검정시험 22개 회차
+            (제57~78회 심화, 총 1,100문항)의{" "}
             <a href="https://www.historyexam.go.kr/pst/list.do?bbs=dat" target="_blank" rel="noopener noreferrer">
               공식 홈페이지 시험자료실
             </a>
@@ -418,9 +419,8 @@ function App() {
             원저작자에게 있습니다.
           </p>
           <p>
-            ※ 그 외 회차(제57·59~61·63~69·73·74·78회 등)는 공개된 문제지가 스캔 이미지 형식이어서 문항 단위 수록이 어려워 제외되었습니다.
-            국사편찬위원회는 기출문제 해설을 제공하지 않으므로, 본 서비스의 정답은 공식 정답표를
-            따르되 해설은 제공되지 않습니다.
+            ※ 국사편찬위원회는 기출문제 해설을 제공하지 않으므로, 본 서비스의 정답은 공식 정답표를
+            따르되 해설은 제공되지 않습니다. 문항의 시대 분류는 문항 텍스트 기반 자동 추정입니다.
           </p>
         </div>
       </footer>

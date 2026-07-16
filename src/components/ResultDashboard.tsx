@@ -30,7 +30,8 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
   // 점수 계산
   const totalScoreLimit = questions.reduce((sum, q) => sum + q.score, 0);
   const earnedScore = questions.reduce((sum, q) => {
-    return sum + (answers[q.id] === q.answer ? q.score : 0);
+    // answer === 0 은 공식 이의심사 결과 '전원 정답' 처리된 문항
+    return sum + (q.answer === 0 || answers[q.id] === q.answer ? q.score : 0);
   }, 0);
 
   const percentageScore = Math.round((earnedScore / totalScoreLimit) * 100);
@@ -65,7 +66,7 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
       epochStats[q.epoch] = { total: 0, correct: 0 };
     }
     epochStats[q.epoch].total += 1;
-    if (answers[q.id] === q.answer) {
+    if (q.answer === 0 || answers[q.id] === q.answer) {
       epochStats[q.epoch].correct += 1;
     }
   });
@@ -76,7 +77,7 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
     return `${mins}분 ${secs}초`;
   };
 
-  const incorrectQuestions = questions.filter((q) => answers[q.id] !== q.answer);
+  const incorrectQuestions = questions.filter((q) => q.answer !== 0 && answers[q.id] !== q.answer);
 
   return (
     <div className="dashboard-container fade-in">
@@ -135,7 +136,7 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
       <div className="dashboard-grid">
         {/* 시대별 약점 분석 (SVG Bar 차트 형식) */}
         <div className="dashboard-card analysis-card">
-          <h3>📊 시대별 정답률 & 약점 분석</h3>
+          <h3>📊 시대별 정답률 & 약점 분석 <span className="epoch-estimate-note">(시대 분류는 문항 텍스트 기반 자동 추정)</span></h3>
           <div className="epoch-bars-container">
             {Object.entries(epochStats).map(([epoch, stat]) => {
               const accuracy = Math.round((stat.correct / stat.total) * 100);

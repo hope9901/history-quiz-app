@@ -43,7 +43,7 @@ export const OMRSheet: React.FC<OMRSheetProps> = ({
         {questions.map((q, idx) => {
           const markedVal = answers[q.id] || null;
           const isCurrent = q.id === currentQuestionId;
-          const isCorrect = markedVal === q.answer;
+          const isCorrect = q.answer === 0 || markedVal === q.answer;
 
           return (
             <div

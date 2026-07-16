@@ -249,6 +249,36 @@ export const WrongAnswerArchive: React.FC = () => {
                             <h5 className="title-sm">📘 시대 핵심 개념</h5>
                             <p className="text-sm">{item.summaryNote}</p>
                           </div>
+
+                          {/* 외부 해설 바로가기 (공식 해설 미제공) */}
+                          <div className="external-solutions-box">
+                            <span>
+                              🔎 제{item.session}회 {item.questionId}번 상세 해설 찾기:{" "}
+                              <a
+                                href={`https://www.comcbt.com/xe/k1`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                전자문제집 CBT
+                              </a>
+                              {" · "}
+                              <a
+                                href="https://www.ebs.co.kr/pass/examination/history/infomation/problem"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                EBS 한국사능력시험
+                              </a>
+                              {" · "}
+                              <a
+                                href={`https://www.google.com/search?q=${encodeURIComponent(`한국사능력검정시험 ${item.session}회 심화 ${item.questionId}번 해설`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                구글 검색
+                              </a>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     )}
