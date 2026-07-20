@@ -2584,22 +2584,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 부드러운 그라데이션 실버 물리 버튼 스타일 */
-  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  color: #0f172a; /* 시인성이 최고인 다크 네이비 텍스트 */
+  /* 첫 번째 캡처의 은은한 어두운 디자인 복원 */
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1; /* 옅은 회색 적용 */
   font-size: 1.25rem;
-  font-weight: 900;
+  font-weight: 800;
   font-family: var(--font-english);
   cursor: pointer;
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
 .option-bubble-btn:hover:not(:disabled) {
-  transform: translateY(-4px) scale(1.08); /* 경쾌한 입체 모션 */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .option-bubble-btn.selected {
@@ -2700,6 +2703,143 @@ body {
     justify-content: center;
   }
 }
+
+/* 세로 스크롤형 실제 OMR 시트 레이아웃 */
+.omr-vertical-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 480px; /* 고정 높이 제공 후 스크롤 지원 */
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* OMR 스크롤바 커스터마이징 (더욱 세련된 UI) */
+.omr-vertical-sheet::-webkit-scrollbar {
+  width: 5px;
+}
+.omr-vertical-sheet::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.01);
+}
+.omr-vertical-sheet::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+.omr-vertical-sheet::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.omr-vertical-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.omr-vertical-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.omr-vertical-row.active {
+  background: rgba(168, 85, 247, 0.06); /* 현재 질문 활성화 시 퍼플 배경 */
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: inset 3px 0 0 var(--secondary-color); /* 좌측 정렬 지시 바 */
+}
+
+.omr-vertical-row.marked {
+  background: rgba(6, 182, 212, 0.03);
+}
+
+.omr-vertical-row.correct {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.02);
+}
+
+.omr-vertical-row.incorrect {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.02);
+}
+
+.omr-vertical-num {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  width: 2.5rem;
+  text-align: left;
+}
+
+.omr-vertical-num .num-prefix {
+  font-size: 0.72rem;
+  opacity: 0.6;
+  margin-right: 1px;
+}
+
+.omr-vertical-row.active .omr-vertical-num {
+  color: var(--secondary-color);
+}
+
+.omr-vertical-row.marked .omr-vertical-num {
+  color: var(--accent-color);
+}
+
+.omr-vertical-bubbles {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.omr-vertical-bubble {
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.omr-vertical-bubble.selected {
+  /* 실제 마킹 느낌의 흰색 배경 + 검은색 굵은 글자 대비 매핑 */
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.omr-vertical-bubble.correct-answer-point {
+  border-color: var(--success-color);
+  color: var(--success-color);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.omr-vertical-bubble.marked-correct {
+  background: var(--success-color);
+  border-color: var(--success-color);
+  color: #fff;
+  font-weight: 900;
+}
+
+.omr-vertical-bubble.marked-incorrect {
+  background: var(--danger-color);
+  border-color: var(--danger-color);
+  color: #fff;
+  font-weight: 900;
+}
+
 
 
 

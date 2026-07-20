@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, ClipboardCheck, CornerDownRight } from "lucide-react";
+import { ClipboardCheck } from "lucide-react";
 
 interface Question {
   id: number;
@@ -21,14 +21,11 @@ export const OMRSheet: React.FC<OMRSheetProps> = ({
   answers,
   currentQuestionId,
   onJumpToQuestion,
-  onMarkAnswer,
   onSubmit,
   isReviewMode = false,
 }) => {
   const answeredCount = Object.values(answers).filter((a) => a !== null).length;
   const totalCount = questions.length;
-  const currentIdx = questions.findIndex((q) => q.id === currentQuestionId);
-  const currentMarkedVal = answers[currentQuestionId] || null;
 
   return (
     <div className="omr-container">
@@ -36,98 +33,85 @@ export const OMRSheet: React.FC<OMRSheetProps> = ({
       <div className="omr-header">
         <div className="omr-header-title">
           <ClipboardCheck size={18} className="text-secondary" />
-          <span className="omr-title">OMR 실시간 마킹판</span>
+          <span className="omr-title">OMR 실시간 답안지</span>
         </div>
         {!isReviewMode && (
           <span className="omr-status">
-            <strong>{answeredCount}</strong> / {totalCount} 완료
+            <strong>{answeredCount}</strong> / {totalCount} 마킹
           </span>
         )}
       </div>
 
-      {/* 1. 컴팩트 OMR 그리드 보드 (1~50 한눈에 확인 가능) */}
-      <div className="omr-grid-dashboard">
+      {/* 세로 일자형 실제 OMR 시트 마킹 테이블 영역 */}
+      <div className="omr-vertical-sheet">
         {questions.map((q, idx) => {
           const markedVal = answers[q.id] || null;
           const isCurrent = q.id === currentQuestionId;
           
-          let gridItemClass = "omr-grid-item";
-          if (isCurrent) gridItemClass += " active";
+          let rowClass = "omr-vertical-row";
+          if (isCurrent) rowClass += " active";
 
           if (isReviewMode) {
             const isCorrect = q.answer === 0 || markedVal === q.answer;
-            gridItemClass += isCorrect ? " correct" : " incorrect";
+            rowClass += isCorrect ? " correct" : " incorrect";
           } else {
             if (markedVal !== null) {
-              gridItemClass += " marked";
+              rowClass += " marked";
             }
           }
 
           return (
-            <button
+            <div
               key={q.id}
-              type="button"
               onClick={() => onJumpToQuestion(idx)}
-              className={gridItemClass}
-              title={`${q.id}번 문제로 바로 이동 (마킹: ${markedVal || "없음"})`}
+              className={rowClass}
+              title={`${q.id}번 문제로 이동 (현재 마킹: ${markedVal || "없음"})`}
             >
-              <span className="q-num-label">{q.id}</span>
-              {markedVal !== null && !isReviewMode && (
-                <span className="q-marked-val">{markedVal}</span>
-              )}
-            </button>
+              {/* 맨 왼쪽: 일자로 정렬되는 문제 번호 */}
+              <div className="omr-vertical-num">
+                <span className="num-prefix">Q</span>
+                <span className="num-val">{q.id}</span>
+              </div>
+
+              {/* 그 옆: 1~5번 실제 OMR 마킹 동그라미 인디케이터 (클릭해도 답안이 변경되지 않고 보기 전용으로만 작동) */}
+              <div className="omr-vertical-bubbles">
+                {[1, 2, 3, 4, 5].map((num) => {
+                  const isBubbleSelected = markedVal === num;
+                  
+                  let bubbleClass = "omr-vertical-bubble";
+                  if (isReviewMode) {
+                    const isRealAnswer = q.answer === num;
+                    if (isRealAnswer) {
+                      bubbleClass += " correct-answer-point"; // 실제 정답
+                    }
+                    if (isBubbleSelected) {
+                      const isCorrect = q.answer === 0 || markedVal === q.answer;
+                      bubbleClass += isCorrect ? " marked-correct" : " marked-incorrect";
+                    }
+                  } else {
+                    if (isBubbleSelected) {
+                      bubbleClass += " selected";
+                    }
+                  }
+
+                  return (
+                    <div key={num} className={bubbleClass}>
+                      <span className="bubble-num">{num}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
 
-      {/* 2. 현재 활성화된 질문의 상세 5지선다 OMR 마킹 라인 */}
-      <div className="omr-current-marking-panel">
-        <div className="current-marking-header">
-          <CornerDownRight size={14} className="info-icon" />
-          <span>현재 <strong>Q{currentQuestionId}</strong>번 마킹</span>
-        </div>
-        <div className="current-omr-row">
-          {[1, 2, 3, 4, 5].map((num) => {
-            const isBubbleSelected = currentMarkedVal === num;
-            
-            let bubbleClass = "omr-bubble-large";
-            if (isReviewMode) {
-              const isRealAnswer = questions[currentIdx]?.answer === num;
-              if (isRealAnswer) {
-                bubbleClass += " bubble-correct-ans"; // 실제 정답 표시
-              }
-              if (isBubbleSelected) {
-                const isCorrect = questions[currentIdx]?.answer === 0 || currentMarkedVal === questions[currentIdx]?.answer;
-                bubbleClass += isCorrect ? " bubble-marked-correct" : " bubble-marked-incorrect";
-              }
-            } else {
-              if (isBubbleSelected) {
-                bubbleClass += " bubble-selected";
-              }
-            }
-
-            return (
-              <button
-                key={num}
-                type="button"
-                disabled={isReviewMode}
-                onClick={() => onMarkAnswer(currentQuestionId, num)}
-                className={bubbleClass}
-              >
-                {num}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* OMR 범례 / 제출 컨트롤 영역 */}
+      {/* 최종 제출 / 가이드 컨트롤 */}
       {!isReviewMode ? (
         <button
           onClick={onSubmit}
           className="omr-submit-btn"
         >
-          <Check size={16} />
           <span>답안 최종 제출하기</span>
         </button>
       ) : (
@@ -140,7 +124,7 @@ export const OMRSheet: React.FC<OMRSheetProps> = ({
               <span className="legend-dot incorrect"></span> 틀림
             </span>
             <span className="legend-item">
-              <span className="legend-dot actual"></span> 정답번호
+              <span className="legend-dot actual"></span> 정답
             </span>
           </div>
         </div>
