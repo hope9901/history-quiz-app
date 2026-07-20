@@ -2639,6 +2639,26 @@ body {
   pointer-events: none;
 }
 
+/* 모바일: 버블 선지 축소 (5개 + 간격이 화면 폭을 넘지 않도록) */
+@media (max-width: 640px) {
+  .options-horizontal-container {
+    width: 100%;
+    padding: 0.85rem 0.6rem;
+    margin: 1.1rem 0;
+  }
+
+  .options-horizontal-row {
+    gap: 0.5rem;
+  }
+
+  /* 터치 접근성 권장 최소 크기(44px) 확보 */
+  .option-bubble-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.05rem;
+  }
+}
+
 /* 오답 백업/복원 툴킷 */
 .archive-backup-toolkit {
   display: flex;
