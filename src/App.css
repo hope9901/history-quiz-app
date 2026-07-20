@@ -2534,85 +2534,108 @@ body {
   line-height: 1.7;
 }
 
-/* 가로 1행 답안 버블 선택지 */
+/* 가로 1행 답안 버블 선택지 - 주위 디자인과 완벽 조화되는 프리미엄 글래스모피즘 디자인 */
 .options-horizontal-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.8rem;
-  margin: 1.5rem 0;
-  padding: 1.2rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--border-radius-md);
+  gap: 0.85rem;
+  margin: 1.75rem 0;
+  padding: 1.25rem 2rem;
+  background: rgba(15, 23, 42, 0.55); /* 깊이감 있는 다크 네이비 글래스 배경 */
+  backdrop-filter: blur(12px); /* 고급 블러 필터 */
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* 세련된 미세 경계선 */
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.options-horizontal-container:hover {
+  border-color: rgba(6, 182, 212, 0.25); /* 호버 시 주위 시안 광채와 동화 */
+  box-shadow: 0 12px 35px rgba(6, 182, 212, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
 .marking-label {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #cbd5e1;
-  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  /* 사이언-바이올렛 미세 그라데이션 텍스트 */
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .options-horizontal-row {
   display: flex;
   justify-content: center;
-  gap: 1.35rem; /* 버튼 간격을 더욱 시원시원하고 넉넉하게 확장 */
+  gap: 1.5rem; /* 터치가 편리한 넉넉한 간격 */
 }
 
 .option-bubble-btn {
-  width: 3rem;
-  height: 3rem;
+  width: 3.2rem;
+  height: 3.2rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff; /* 동그라미 흰색 적용 */
-  border: 2px solid #ffffff;
-  color: #0f172a; /* 숫자는 진한 검은색 적용 */
-  font-size: 1.15rem;
-  font-weight: 900; /* 또렷한 볼드 적용 */
+  /* 부드러운 그라데이션 실버 물리 버튼 스타일 */
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #0f172a; /* 시인성이 최고인 다크 네이비 텍스트 */
+  font-size: 1.25rem;
+  font-weight: 900;
+  font-family: var(--font-english);
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* 눈에 쏙 들어오게 그림자 입체감 강화 */
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .option-bubble-btn:hover:not(:disabled) {
-  background: #f8fafc;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+  transform: translateY(-4px) scale(1.08); /* 경쾌한 입체 모션 */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.15);
 }
 
 .option-bubble-btn.selected {
-  background: var(--accent-color); /* 선택 시 활성 사이언 색상 */
-  border-color: var(--accent-color);
-  color: #ffffff; /* 흰색 글자 전환 */
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.6);
-  transform: scale(1.1) translateY(-2px);
+  /* 활성화 시 테마와 혼연일체 되는 광채 블루 그라데이션 적용 */
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  border-color: transparent;
+  color: #ffffff; /* 흰색 글자 */
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.75), inset 0 2px 2px rgba(255, 255, 255, 0.3);
+  transform: translateY(-3px) scale(1.1);
 }
 
 .option-bubble-btn.correct {
-  background: var(--success-color);
-  border-color: var(--success-color);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: transparent;
   color: #fff;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.6), inset 0 2px 2px rgba(255, 255, 255, 0.3);
 }
 
 .option-bubble-btn.incorrect {
-  background: var(--danger-color);
-  border-color: var(--danger-color);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: transparent;
   color: #fff;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.6), inset 0 2px 2px rgba(255, 255, 255, 0.3);
 }
 
 .option-bubble-btn.disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .bubble-val {
   pointer-events: none;
 }
+
 
 
 
