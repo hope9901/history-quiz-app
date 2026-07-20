@@ -1,5 +1,5 @@
 import { useState } from "react";
-import questionsData from "./data/mock_questions.json";
+import questionsData from "./data/official_questions.json";
 import { ExamTimer } from "./components/ExamTimer";
 import { QuestionCard } from "./components/QuestionCard";
 import { OMRSheet } from "./components/OMRSheet";
