@@ -94,48 +94,47 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
         </div>
       ) : null}
 
-      {/* 보기 선택지 */}
-      <div className="options-container">
-        {question.options.map((option, idx) => {
-          const optionNum = idx + 1;
-          const isSelected = selectedAnswer === optionNum;
-          const isCorrectAnswer = question.answer === optionNum;
-          
-          let optionClass = "option-item";
-          if (isReviewMode) {
-            if (isCorrectAnswer) {
-              optionClass += " option-correct";
-            } else if (isSelected && !isCorrectAnswer) {
-              optionClass += " option-incorrect";
+      {/* 보기 선택지 - 가로 한 줄 버블 레이아웃 개편 */}
+      <div className="options-horizontal-container">
+        <span className="marking-label">답안 선택:</span>
+        <div className="options-horizontal-row">
+          {[1, 2, 3, 4, 5].map((num) => {
+            const isSelected = selectedAnswer === num;
+            const isCorrectAnswer = question.answer === num;
+            
+            let btnClass = "option-bubble-btn";
+            if (isReviewMode) {
+              if (isCorrectAnswer) {
+                btnClass += " correct";
+              } else if (isSelected && !isCorrectAnswer) {
+                btnClass += " incorrect";
+              } else {
+                btnClass += " disabled";
+              }
             } else {
-              optionClass += " option-disabled";
+              if (isSelected) {
+                btnClass += " selected";
+              }
             }
-          } else {
-            if (isSelected) {
-              optionClass += " option-selected";
-            }
-          }
 
-          return (
-            <button
-              key={idx}
-              disabled={isReviewMode}
-              onClick={() => onSelectOption(question.id, optionNum)}
-              className={optionClass}
-            >
-              <div className="option-marker">
+            return (
+              <button
+                key={num}
+                disabled={isReviewMode}
+                onClick={() => onSelectOption(question.id, num)}
+                className={btnClass}
+              >
                 {isReviewMode && isCorrectAnswer ? (
                   <CheckCircle2 size={16} className="text-success" />
                 ) : isReviewMode && isSelected && !isCorrectAnswer ? (
                   <XCircle size={16} className="text-danger" />
                 ) : (
-                  <span className="option-num">{optionNum}</span>
+                  <span className="bubble-val">{num}</span>
                 )}
-              </div>
-              <span className="option-text">{option.substring(3)}</span>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 오답노트 해설 영역 (리뷰 모드에서만 출력) */}

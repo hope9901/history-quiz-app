@@ -27,14 +27,14 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
   onStartReview,
   onViewSummary,
 }) => {
-  // 점수 계산
+  // 점수 계산 (사진에 적힌 점수의 실제 원본 누적 합산 적용)
   const totalScoreLimit = questions.reduce((sum, q) => sum + q.score, 0);
   const earnedScore = questions.reduce((sum, q) => {
     // answer === 0 은 공식 이의심사 결과 '전원 정답' 처리된 문항
     return sum + (q.answer === 0 || answers[q.id] === q.answer ? q.score : 0);
   }, 0);
 
-  const percentageScore = Math.round((earnedScore / totalScoreLimit) * 100);
+  const finalScore = earnedScore; // 100점 환산 백분율이 아닌 실제 획득한 1, 2, 3점 배점 자체의 합산 적용
 
   // 등급 판정
   let passGrade = "불합격";
@@ -42,17 +42,17 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
   let gradeIcon = <ThumbsDown size={40} />;
   let feedbackMessage = "아쉽습니다! 기출 개념 정리를 다시 한 번 꼼꼼히 학습해 보세요.";
 
-  if (percentageScore >= 80) {
+  if (finalScore >= 80) {
     passGrade = "1급 (1등급)";
     gradeClass = "grade-1";
     gradeIcon = <Award size={40} className="shine" />;
     feedbackMessage = "축하합니다! 최고 등급인 1급(1등급)에 합격하셨습니다! 실전에서도 고득점이 기대됩니다.";
-  } else if (percentageScore >= 70) {
+  } else if (finalScore >= 70) {
     passGrade = "2급 (2등급)";
     gradeClass = "grade-2";
     gradeIcon = <Award size={40} />;
     feedbackMessage = "우수합니다! 2급(2등급)에 합격하셨습니다. 조금만 더 빈출 오답을 다듬으면 1급도 가능해요!";
-  } else if (percentageScore >= 60) {
+  } else if (finalScore >= 60) {
     passGrade = "3급 (3등급)";
     gradeClass = "grade-3";
     gradeIcon = <ThumbsUp size={40} />;
@@ -91,8 +91,8 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
         </div>
         <div className="stats-main">
           <div className="stat-score">
-            <span className="score-num">{percentageScore}</span>
-            <span className="score-unit">점 / 100점 환산</span>
+            <span className="score-num">{finalScore}</span>
+            <span className="score-unit">점 / 100점</span>
           </div>
           <div className="stat-details">
             <div className="stat-item">
