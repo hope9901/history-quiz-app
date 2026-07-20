@@ -44,6 +44,59 @@ export const WrongAnswerArchive: React.FC = () => {
     loadArchive();
   }, []);
 
+  // 오답 백업 내보내기 (JSON 다운로드 -> 다른 기기로 이전 가능하게 지원)
+  const handleExportArchive = () => {
+    if (archivedList.length === 0) {
+      alert("백업할 오답 데이터가 없습니다.");
+      return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(archivedList));
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `korean_history_wrong_notes_${Date.now()}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  // 오답 백업 가져오기 (JSON 업로드 및 병합)
+  const handleImportArchive = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileReader = new FileReader();
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    fileReader.onload = (event) => {
+      try {
+        const fileContent = event.target?.result as string;
+        const importedData = JSON.parse(fileContent) as ArchivedQuestion[];
+        
+        if (!importedData || !Array.isArray(importedData)) {
+          alert("올바르지 않은 백업 파일 형식입니다.");
+          return;
+        }
+
+        const combined = [...archivedList];
+        
+        importedData.forEach((importedItem) => {
+          // 중복 archiveId가 없는 경우에만 복원 병합
+          if (!combined.some((item) => item.archiveId === importedItem.archiveId)) {
+            combined.push(importedItem);
+          }
+        });
+
+        const sorted = combined.sort((a, b) => b.timestamp - a.timestamp);
+        setArchivedList(sorted);
+        localStorage.setItem("history_exam_notes", JSON.stringify(sorted));
+        alert(`성공적으로 ${importedData.length}개의 오답 데이터를 병합 복원하였습니다!`);
+      } catch (err) {
+        alert("백업 파일을 파싱하는 데 실패했습니다. 파일 훼손 여부를 확인해 주세요.");
+      }
+    };
+    fileReader.readAsText(files[0]);
+    // 파일 탐색기 버퍼 초기화로 동일 파일 재선택 가능 처리
+    e.target.value = "";
+  };
+
   // 카드 토글 함수
   const toggleCard = (archiveId: string) => {
     setExpandedCards((prev) => ({
@@ -91,12 +144,28 @@ export const WrongAnswerArchive: React.FC = () => {
           <h2>로컬 오답 보관함</h2>
           <span className="archive-count-badge">{archivedList.length}개 보관 중</span>
         </div>
-        {archivedList.length > 0 && (
-          <button onClick={handleClearAll} className="btn-clear-all" title="보관함 비우기">
-            <Trash2 size={15} />
-            <span>보관함 비우기</span>
+        
+        {/* 기기 간 오답 공유 백업/복원 툴킷 */}
+        <div className="archive-backup-toolkit">
+          <button onClick={handleExportArchive} className="btn-backup-export" title="오답 데이터 백업 파일 받기">
+            📥 오답 백업하기
           </button>
-        )}
+          <label className="btn-backup-import" title="백업 파일 가져와 병합하기">
+            📤 백업 복원하기
+            <input 
+              type="file" 
+              accept=".json" 
+              onChange={handleImportArchive} 
+              style={{ display: "none" }} 
+            />
+          </label>
+          {archivedList.length > 0 && (
+            <button onClick={handleClearAll} className="btn-clear-all" title="보관함 비우기">
+              <Trash2 size={14} />
+              <span>보관함 비우기</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {archivedList.length === 0 ? (
