@@ -28,7 +28,6 @@ export const ResultDashboard: React.FC<ResultDashboardProps> = ({
   onViewSummary,
 }) => {
   // 점수 계산 (사진에 적힌 점수의 실제 원본 누적 합산 적용)
-  const totalScoreLimit = questions.reduce((sum, q) => sum + q.score, 0);
   const earnedScore = questions.reduce((sum, q) => {
     // answer === 0 은 공식 이의심사 결과 '전원 정답' 처리된 문항
     return sum + (q.answer === 0 || answers[q.id] === q.answer ? q.score : 0);
