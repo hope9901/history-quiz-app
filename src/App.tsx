@@ -238,10 +238,12 @@ function App() {
           <div className="intro-container fade-in">
             <div className="intro-hero-section">
               <Award className="hero-icon animated-float" size={64} />
-              <h2>한국사능력검정시험 실전 모의고사 & 오답노트</h2>
+              <h2>
+                한국사능력검정시험<wbr /> 실전 모의고사 &amp; 오답노트
+              </h2>
               <p className="hero-subtitle">
-                실제 시험과 동일한 **80분 제한시간** 동안 문제를 풀고,<br />
-                틀린 개념들은 오답 보관함에 누적 보관하여 완벽히 정복하세요. (노션 비연동 로컬 보관)
+                실제 시험과 동일한 <strong>80분 제한시간</strong> 동안 문제를 풀고, 틀린 개념은
+                오답 보관함에 자동으로 쌓아 완벽히 정복하세요.
               </p>
             </div>
 
