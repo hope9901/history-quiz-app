@@ -34,6 +34,11 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({ src, alt, onClose 
 
   return (
     <div className="lightbox-overlay" onClick={onClose} role="dialog" aria-label="이미지 확대 보기">
+      {/* 우측 상단 큼직한 모바일/데스크톱 겸용 플로팅 닫기 버튼 */}
+      <button className="lightbox-close-floating-btn" onClick={onClose} aria-label="닫기">
+        <X size={26} />
+      </button>
+
       <div className="lightbox-toolbar" onClick={(e) => e.stopPropagation()}>
         <button onClick={() => setScale((s) => Math.max(MIN_SCALE, s - 0.25))} aria-label="축소">
           <ZoomOut size={20} />
@@ -45,20 +50,20 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({ src, alt, onClose 
         <button onClick={() => setScale(1.5)} aria-label="원래 크기">
           <RotateCcw size={18} />
         </button>
-        <button onClick={onClose} aria-label="닫기">
-          <X size={20} />
-        </button>
       </div>
-      <div className="lightbox-scroll" onClick={(e) => e.stopPropagation()} onWheel={handleWheel}>
+
+      {/* lightbox-scroll 에 onClick={onClose}를 걸어, 이미지 바깥 빈 영역을 터치해도 바로 닫히게 개선 */}
+      <div className="lightbox-scroll" onClick={onClose} onWheel={handleWheel}>
         <img
           src={src}
           alt={alt}
           className="lightbox-image"
           style={{ width: `${scale * 100}%` }}
+          onClick={(e) => e.stopPropagation()} // 이미지 터치(드래그, 더블탭 등) 시에는 닫히지 않도록 이벤트 전파 차단
           onDoubleClick={() => setScale((s) => (s >= 2.5 ? 1.5 : s + 1))}
         />
       </div>
-      <p className="lightbox-hint">휠·버튼·더블클릭으로 확대, 드래그로 이동, 바깥 영역을 누르면 닫힙니다</p>
+      <p className="lightbox-hint">휠·버튼·더블클릭으로 확대, 드래그로 이동, 바깥 빈 영역이나 X 버튼을 누르면 닫힙니다</p>
     </div>
   );
 };
