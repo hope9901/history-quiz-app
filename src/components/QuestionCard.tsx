@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, CheckCircle2, XCircle, Info, ZoomIn } from "lucide-react";
-import { ImageLightbox } from "./ImageLightbox";
+import { ChevronLeft, ChevronRight, CheckCircle2, XCircle, Info } from "lucide-react";
 
 interface Question {
   id: number;
@@ -24,6 +23,7 @@ interface QuestionCardProps {
   onPrev: () => void;
   onNext: () => void;
   isReviewMode?: boolean;
+  session?: string; // 리뷰 모드의 외부 상세 해설 링크 생성용 회차 번호
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -35,14 +35,13 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   onPrev,
   onNext,
   isReviewMode = false,
+  session,
 }) => {
   const [imageError, setImageError] = useState(false);
-  const [zoomOpen, setZoomOpen] = useState(false);
 
-  // 문제 번호가 변경될 때마다 이미지 에러/확대 상태 초기화
+  // 문제 번호가 변경될 때마다 이미지 에러 상태 초기화
   useEffect(() => {
     setImageError(false);
-    setZoomOpen(false);
   }, [question.id]);
 
   return (
@@ -76,17 +75,9 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           <img
             src={question.imageUrl}
             alt="문제 지문"
-            className="question-material-image zoomable"
-            onClick={() => setZoomOpen(true)}
+            className="question-material-image"
             onError={() => setImageError(true)}
           />
-          <button className="zoom-hint-btn" onClick={() => setZoomOpen(true)}>
-            <ZoomIn size={14} />
-            <span>글자가 작으면 눌러서 확대</span>
-          </button>
-          {zoomOpen && (
-            <ImageLightbox src={question.imageUrl} alt="문제 지문 확대" onClose={() => setZoomOpen(false)} />
-          )}
         </div>
       ) : question.imageUrl && imageError ? (
         <div className="material-image-placeholder">
@@ -150,6 +141,34 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           <div className="summary-note-box">
             <h4 className="summary-title">📘 핵심 개념 정리</h4>
             <p className="summary-text">{question.summaryNote}</p>
+          </div>
+
+          {/* 외부 상세 해설 바로가기 (공식 해설 미제공) */}
+          <div className="external-solutions-box">
+            <span>
+              🔎 {session ? `제${session}회 ` : ""}{question.id}번 상세 해설 찾기:{" "}
+              <a href="https://www.comcbt.com/xe/k1" target="_blank" rel="noopener noreferrer">
+                전자문제집 CBT
+              </a>
+              {" · "}
+              <a
+                href="https://www.ebs.co.kr/pass/examination/history/infomation/problem"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                EBS 한국사능력시험
+              </a>
+              {" · "}
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent(
+                  `한국사능력검정시험 ${session ? `${session}회 ` : ""}심화 ${question.id}번 해설`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                구글 검색
+              </a>
+            </span>
           </div>
         </div>
       )}
