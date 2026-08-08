@@ -19,6 +19,10 @@ import re
 TARGET_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "data")
 TARGET_FILE = os.path.join(TARGET_DIR, "official_questions.json")
 
+# 문항별 수작업 선지 해설 디렉터리 (회차별 JSON: {"문항번호": {"explanation": "..."}})
+# 여기에 있는 해설은 자동 생성 해설보다 우선하며, 재생성 시에도 덮어써지지 않는다.
+CURATED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "curated")
+
 # 시대별 빈출 핵심 개념 정리 (교과서·기출 공통 사실만 수록)
 EPOCH_KEY_POINTS = {
     "선사": [
@@ -162,16 +166,28 @@ def regenerate():
         database = json.load(f)
 
     total = 0
+    curated_count = 0
     for round_num, questions in database.items():
+        curated = {}
+        curated_path = os.path.join(CURATED_DIR, f"{round_num}.json")
+        if os.path.exists(curated_path):
+            with open(curated_path, "r", encoding="utf-8") as f:
+                curated = json.load(f)
+
         for q in questions:
             keywords = extract_keywords(q.get("summaryNote", ""))
-            q["explanation"] = build_explanation(round_num, q, keywords)
+            manual = curated.get(str(q.get("id")))
+            if manual and manual.get("explanation"):
+                q["explanation"] = manual["explanation"]
+                curated_count += 1
+            else:
+                q["explanation"] = build_explanation(round_num, q, keywords)
             q["summaryNote"] = build_summary_note(q, keywords)
             total += 1
 
     with open(TARGET_FILE, "w", encoding="utf-8") as f:
         json.dump(database, f, ensure_ascii=False, indent=2)
-    print(f"[+] 완료: 총 {total}문항의 해설·요약노트를 재생성했습니다.")
+    print(f"[+] 완료: 총 {total}문항 (수작업 선지 해설 {curated_count}건 반영).")
 
 
 if __name__ == "__main__":
