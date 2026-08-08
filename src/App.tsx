@@ -357,6 +357,7 @@ function App() {
                 onPrev={handlePrevQuestion}
                 onNext={handleNextQuestion}
                 isReviewMode={true}
+                session={selectedSession}
               />
             </div>
             
@@ -421,8 +422,9 @@ function App() {
             원저작자에게 있습니다.
           </p>
           <p>
-            ※ 국사편찬위원회는 기출문제 해설을 제공하지 않으므로, 본 서비스의 정답은 공식 정답표를
-            따르되 해설은 제공되지 않습니다. 문항의 시대 분류는 문항 텍스트 기반 자동 추정입니다.
+            ※ 국사편찬위원회는 기출문제 해설을 제공하지 않습니다. 본 서비스의 정답은 공식 정답표를
+            따르며, 해설 영역에는 문항별 선지 해설 대신 시대별 핵심 개념 정리와 외부 상세 해설
+            바로가기를 제공합니다. 문항의 시대 분류는 문항 텍스트 기반 자동 추정입니다.
           </p>
         </div>
       </footer>

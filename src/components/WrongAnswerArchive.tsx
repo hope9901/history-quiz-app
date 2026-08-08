@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { BookOpen, CheckCircle, Trash2, Filter, AlertCircle, HelpCircle } from "lucide-react";
-import { ImageLightbox } from "./ImageLightbox";
 
 interface ArchivedQuestion {
   archiveId: string;
@@ -24,7 +23,6 @@ export const WrongAnswerArchive: React.FC = () => {
   const [activeEpochFilter, setActiveEpochFilter] = useState<string>("ALL");
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
-  const [zoomTarget, setZoomTarget] = useState<string | null>(null);
 
   // 로컬스토리지에서 오답 데이터 가져오기
   useEffect(() => {
@@ -271,8 +269,7 @@ export const WrongAnswerArchive: React.FC = () => {
                             <img
                               src={item.imageUrl}
                               alt="문제 지문"
-                              className="question-material-image zoomable"
-                              onClick={() => setZoomTarget(item.imageUrl || null)}
+                              className="question-material-image"
                               onError={() => setImageErrors((prev) => ({ ...prev, [item.archiveId]: true }))}
                             />
                           </div>
@@ -360,11 +357,6 @@ export const WrongAnswerArchive: React.FC = () => {
             </div>
           )}
         </>
-      )}
-
-      {/* 이미지 확대 모달 */}
-      {zoomTarget && (
-        <ImageLightbox src={zoomTarget} alt="문제 지문 확대" onClose={() => setZoomTarget(null)} />
       )}
     </div>
   );
