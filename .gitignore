@@ -25,3 +25,6 @@ scripts/official_pdfs/
 *.njsproj
 *.sln
 *.sw?
+
+# 파이썬 캐시
+__pycache__/
