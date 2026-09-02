@@ -397,65 +397,130 @@ def render_clip(page, clip):
     return Image.open(io.BytesIO(pix.tobytes("png")))
 
 
+def vstack(top_img, bottom_img, gap):
+    """두 이미지를 세로로 이어 붙인다(좌측 정렬, 흰 배경)."""
+    combo = Image.new(
+        "RGB",
+        (max(top_img.width, bottom_img.width), top_img.height + gap + bottom_img.height),
+        "white",
+    )
+    combo.paste(top_img, (0, 0))
+    combo.paste(bottom_img, (0, top_img.height + gap))
+    return combo
+
+
+def column_regions(doc, words_pages, left_span, right_span, left_col, right_col):
+    """지면을 읽는 순서(페이지→왼쪽 단→오른쪽 단)대로 '단 구역' 목록을 만든다."""
+    regions = []
+    for pno, page in enumerate(doc):
+        words = words_pages[pno]
+        page_bottom = page.rect.height - FOOTER_MARGIN
+        marks = find_questions(words, left_span, right_span)
+        headers = find_shared_headers(words, left_col, right_col)
+        for col_key, (cx0, cx1) in (("L", left_col), ("R", right_col)):
+            col = sorted([m for m in marks if m[1] == col_key], key=lambda m: m[2])
+            footer_ys = [
+                w[1] for w in words
+                if cx0 <= w[0] <= cx1 and is_footer_word(w, page.rect.height)
+            ]
+            regions.append({
+                "pno": pno,
+                "col": col_key,
+                "cx0": cx0,
+                "cx1": cx1,
+                "marks": col,
+                "headers": [h for h in headers if h[2] == col_key],
+                "content_bottom": (min(footer_ys) - 6) if footer_ys else page_bottom,
+                "page_bottom": page_bottom,
+            })
+    return regions
+
+
+def find_continuation(doc, words_pages, region):
+    """단 최상단 ~ 첫 문항 번호(또는 공동 지문 헤더) 직전 구간이
+    앞 단에서 넘어온 선지인지 판정하고, 맞으면 그 clip을 돌려준다.
+
+    판정 조건: 그 구간에 선지 기호(①~⑤)가 있고, 문항 번호 토큰은 없어야 한다.
+    (문항 번호가 있으면 새 문항이고, 공동 지문 헤더는 stops에 포함되어 제외된다.)
+    """
+    page_h = doc[region["pno"]].rect.height
+    words = words_pages[region["pno"]]
+    cx0, cx1 = region["cx0"], region["cx1"]
+    stops = [m[2] for m in region["marks"]] + [h[3] for h in region["headers"]]
+    if not stops:
+        return None
+    band_bottom = min(stops) - 10
+    band = [
+        w for w in words
+        if cx0 <= w[0] <= cx1 and w[1] < band_bottom and not is_footer_word(w, page_h)
+    ]
+    if not band:
+        return None
+    if not any(c in "".join(w[4] for w in band) for c in CIRCLED):
+        return None
+    for w in band:
+        m = NUM_RE.fullmatch(w[4])
+        if m and 1 <= int(m.group(1)) <= 50:
+            return None  # 새 문항 번호가 있으면 이어짐이 아니다
+    return fitz.Rect(cx0, min(w[1] for w in band) - 8, cx1, band_bottom)
+
+
 def crop_questions(exam_pdf, out_dir, round_no):
     """문제지 PDF를 문항 단위 이미지로 분할 저장한다.
 
     공동 지문([NN~MM])이 있는 문항은 지문 이미지를 문항 위에 합성한다.
+    단(段)이나 쪽 경계를 넘어간 선지는 다음 단 최상단에서 찾아 아래에 이어 붙인다.
     반환: (모드, 문항번호→텍스트 사전)
     """
     os.makedirs(out_dir, exist_ok=True)
     doc = fitz.open(exam_pdf)
     words_pages, mode = get_words_pages(doc, round_no)
     left_span, right_span, left_col, right_col = detect_layout(words_pages)
+    regions = column_regions(doc, words_pages, left_span, right_span, left_col, right_col)
     saved = {}
     texts = {}  # 문항번호 → 문항 텍스트 (시대 분류용)
     passages = {}  # 문항번호 → 지문 PIL 이미지
-    for pno, page in enumerate(doc):
-        words = words_pages[pno]
-        page_content_bottom = page.rect.height - FOOTER_MARGIN
-        marks = find_questions(words, left_span, right_span)
-        headers = find_shared_headers(words, left_col, right_col)
-        for col_key, (cx0, cx1) in (("L", left_col), ("R", right_col)):
-            col = sorted([m for m in marks if m[1] == col_key], key=lambda m: m[2])
+    spilled = []  # 이어붙이기가 적용된 문항 번호
+    for ri, region in enumerate(regions):
+        page = doc[region["pno"]]
+        words = words_pages[region["pno"]]
+        cx0, cx1 = region["cx0"], region["cx1"]
+        col = region["marks"]
+        # 공동 지문: 헤더 y부터 범위 시작 문항 번호 y 직전까지
+        for h_start, h_end, _h_col, h_y in region["headers"]:
+            first_q = next((m for m in col if m[0] == h_start), None)
+            if first_q is None:
+                continue
+            img = render_clip(page, fitz.Rect(cx0, h_y - 6, cx1, first_q[2] - 10))
+            for n in range(h_start, h_end + 1):
+                passages[n] = img
+        for i, (n, _, y0) in enumerate(col):
+            is_last = i + 1 == len(col)
             # 단의 마지막 문항은 페이지 번호(푸터) 직전까지 포함시킨다.
             # (그림 선지처럼 텍스트가 없는 영역이 잘리지 않도록 텍스트 최하단 대신 푸터 기준 사용)
-            footer_ys = [
-                w[1] for w in words
-                if cx0 <= w[0] <= cx1 and is_footer_word(w, page.rect.height)
-            ]
-            content_bottom = (min(footer_ys) - 6) if footer_ys else page_content_bottom
-            # 공동 지문: 헤더 y부터 범위 시작 문항 번호 y 직전까지
-            for h_start, h_end, h_col, h_y in headers:
-                if h_col != col_key:
-                    continue
-                first_q = next((m for m in col if m[0] == h_start), None)
-                if first_q is None:
-                    continue
-                clip = fitz.Rect(cx0, h_y - 6, cx1, first_q[2] - 10)
-                img = render_clip(page, clip)
-                for n in range(h_start, h_end + 1):
-                    passages[n] = img
-            for i, (n, _, y0) in enumerate(col):
-                y_top = y0 - 8
-                y_bot = (col[i + 1][2] - 10) if i + 1 < len(col) else content_bottom
-                clip = fitz.Rect(cx0, y_top, cx1, min(y_bot, page_content_bottom))
-                img = render_clip(page, clip)
-                if n in passages:
-                    p_img = passages[n]
-                    gap = 14
-                    combo = Image.new(
-                        "RGB", (max(p_img.width, img.width), p_img.height + gap + img.height), "white"
-                    )
-                    combo.paste(p_img, (0, 0))
-                    combo.paste(img, (0, p_img.height + gap))
-                    img = combo
-                fname = f"q{n:02d}.jpg"
-                img.convert("RGB").save(os.path.join(out_dir, fname), "JPEG", quality=87)
-                saved[n] = fname
-                texts[n] = texts.get(n, "") + " " + text_in_clip(words, clip)
+            y_bot = region["content_bottom"] if is_last else (col[i + 1][2] - 10)
+            clip = fitz.Rect(cx0, y0 - 8, cx1, min(y_bot, region["page_bottom"]))
+            img = render_clip(page, clip)
+            text = text_in_clip(words, clip)
+            # 단/쪽을 넘어간 선지 이어붙이기
+            if is_last and ri + 1 < len(regions):
+                nxt = regions[ri + 1]
+                cont = find_continuation(doc, words_pages, nxt)
+                if cont is not None:
+                    img = vstack(img, render_clip(doc[nxt["pno"]], cont), 6)
+                    text += " " + text_in_clip(words_pages[nxt["pno"]], cont)
+                    spilled.append(n)
+            if n in passages:
+                img = vstack(passages[n], img, 14)
+            fname = f"q{n:02d}.jpg"
+            img.convert("RGB").save(os.path.join(out_dir, fname), "JPEG", quality=87)
+            saved[n] = fname
+            texts[n] = texts.get(n, "") + " " + text
     doc.close()
     missing = [n for n in range(1, 51) if n not in saved]
     assert not missing, f"{exam_pdf}: 누락 문항 {missing}"
+    if spilled:
+        print(f"    · 단/쪽 경계를 넘어간 선지 이어붙임: {sorted(spilled)}번")
     return mode, texts
 
 
