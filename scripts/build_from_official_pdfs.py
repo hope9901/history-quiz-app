@@ -19,7 +19,9 @@ import io
 import os
 import re
 import json
+import shutil
 import subprocess
+import tempfile
 
 import fitz  # PyMuPDF
 from PIL import Image
@@ -49,8 +51,23 @@ RENDER_ZOOM = 2.0
 FOOTER_WORD_RE = re.compile(r"^[\d/\\|]+$")
 
 
-def is_footer_word(w, page_h):
-    return w[1] > page_h * 0.88 and bool(FOOTER_WORD_RE.fullmatch(w[4]))
+def is_footer_word(w, page_h, words=None):
+    """페이지 번호(푸터) 토큰인지 판정한다.
+
+    숫자만으로 이루어졌다는 조건만 쓰면 '⑤ … 2·8 독립 선언서 …'처럼 지면
+    아래쪽에 놓인 선지의 숫자까지 푸터로 오인해, 그 선지가 통째로 잘려 나간다.
+    실제 푸터는 그 줄에 저 혼자 있으므로 같은 줄에 다른 글자가 있으면 본문으로 본다.
+    """
+    if not (w[1] > page_h * 0.88 and FOOTER_WORD_RE.fullmatch(w[4])):
+        return False
+    if words is None:
+        return True
+    for o in words:
+        if o is w:
+            continue
+        if abs(o[1] - w[1]) <= 8 and not FOOTER_WORD_RE.fullmatch(o[4]):
+            return False
+    return True
 
 
 def isnum(s):
@@ -107,6 +124,65 @@ def has_text_layer(doc):
     return sum(len(doc[i].get_text().strip()) for i in range(min(3, len(doc)))) > 500
 
 
+# 문항 번호는 굵은 큰 글자라 OCR이 마침표를 쉼표·가운뎃점으로 자주 잘못 읽는다.
+OCR_NUM_FIX_RE = re.compile(r"^(\d{1,2})[,、·:;]$")
+
+
+def _normalize_ocr_word(text):
+    """OCR 토큰의 흔한 오인식을 문항 번호 형태로 되돌린다.
+
+    '12,' → '12.'  (엉뚱한 본문 숫자가 섞여도 find_questions()가 단 시작
+    x좌표로 걸러내므로, 여기서는 형태만 맞춰 준다.)
+    """
+    return OCR_NUM_FIX_RE.sub(r"\1.", text)
+
+
+def tesseract_words_pages(doc, round_no):
+    """스캔 PDF를 Tesseract로 OCR해 단어 좌표를 얻는다(리눅스·macOS용).
+
+    Windows OCR(ocr_words.ps1)을 쓸 수 없는 환경에서의 대체 경로다.
+    필요: tesseract 본체와 한국어 데이터(apt install tesseract-ocr tesseract-ocr-kor)
+    """
+    cache = os.path.join(PDF_DIR, "ocr_cache", f"{round_no}_tesseract.json")
+    if not os.path.exists(cache):
+        os.makedirs(os.path.dirname(cache), exist_ok=True)
+        pages = []
+        with tempfile.TemporaryDirectory() as tmp:
+            for i, page in enumerate(doc):
+                png = os.path.join(tmp, f"p{i+1:02d}.png")
+                page.get_pixmap(matrix=fitz.Matrix(RENDER_ZOOM, RENDER_ZOOM)).save(png)
+                r = subprocess.run(
+                    ["tesseract", png, "stdout", "--psm", "11", "-l", "kor+eng", "tsv"],
+                    capture_output=True, text=True, timeout=600,
+                )
+                if r.returncode != 0:
+                    raise RuntimeError(f"tesseract 실패 (제{round_no}회 {i+1}쪽): {r.stderr[:300]}")
+                words = []
+                for line in r.stdout.splitlines()[1:]:
+                    f = line.split("\t")
+                    if len(f) < 12 or not f[11].strip():
+                        continue
+                    try:
+                        conf = float(f[10])
+                        x, y, w, h = (int(f[6]), int(f[7]), int(f[8]), int(f[9]))
+                    except ValueError:
+                        continue
+                    if conf < 30:
+                        continue
+                    words.append([x, y, x + w, y + h, _normalize_ocr_word(f[11].strip())])
+                pages.append(words)
+        with open(cache, "w", encoding="utf-8") as f:
+            json.dump(pages, f, ensure_ascii=False)
+    with open(cache, encoding="utf-8") as f:
+        pages = json.load(f)
+    # 픽셀 좌표(zoom 배율) → PDF 포인트 좌표
+    return [
+        [(w[0] / RENDER_ZOOM, w[1] / RENDER_ZOOM, w[2] / RENDER_ZOOM, w[3] / RENDER_ZOOM, w[4])
+         for w in page]
+        for page in pages
+    ]
+
+
 def ocr_words_pages(doc, round_no):
     """스캔 PDF의 각 페이지를 렌더링해 Windows OCR로 단어 좌표를 얻는다."""
     cache = os.path.join(PDF_DIR, "ocr_cache", f"{round_no}.json")
@@ -139,10 +215,18 @@ def ocr_words_pages(doc, round_no):
 
 
 def get_words_pages(doc, round_no):
-    """페이지별 단어 목록 [(x0,y0,x1,y1,text), …] 과 모드('text'|'ocr')를 돌려준다."""
+    """페이지별 단어 목록 [(x0,y0,x1,y1,text), …] 과 모드('text'|'ocr'|'tesseract')를 돌려준다."""
     if has_text_layer(doc):
         return [page.get_text("words") for page in doc], "text"
-    return ocr_words_pages(doc, round_no), "ocr"
+    if shutil.which("powershell"):
+        return ocr_words_pages(doc, round_no), "ocr"
+    if shutil.which("tesseract"):
+        return tesseract_words_pages(doc, round_no), "tesseract"
+    raise RuntimeError(
+        "스캔 PDF라 OCR이 필요하지만 사용할 수 있는 OCR이 없습니다. "
+        "Windows라면 PowerShell을, 그 외에는 tesseract를 설치하세요 "
+        "(apt install tesseract-ocr tesseract-ocr-kor)."
+    )
 
 
 # ── 지면 구조 감지 ───────────────────────────────────────────────
@@ -421,7 +505,7 @@ def column_regions(doc, words_pages, left_span, right_span, left_col, right_col)
             col = sorted([m for m in marks if m[1] == col_key], key=lambda m: m[2])
             footer_ys = [
                 w[1] for w in words
-                if cx0 <= w[0] <= cx1 and is_footer_word(w, page.rect.height)
+                if cx0 <= w[0] <= cx1 and is_footer_word(w, page.rect.height, words)
             ]
             regions.append({
                 "pno": pno,
@@ -452,7 +536,7 @@ def find_continuation(doc, words_pages, region):
     band_bottom = min(stops) - 10
     band = [
         w for w in words
-        if cx0 <= w[0] <= cx1 and w[1] < band_bottom and not is_footer_word(w, page_h)
+        if cx0 <= w[0] <= cx1 and w[1] < band_bottom and not is_footer_word(w, page_h, words)
     ]
     if not band:
         return None
