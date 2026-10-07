@@ -275,10 +275,7 @@ function App() {
               <div className="feature-card">
                 <BookOpen className="feature-icon" size={24} />
                 <h3>오답 자동 아카이빙</h3>
-                <p>
-                  제출 후 틀린 문제가 [오답 보관함] 탭에 자동으로 쌓입니다. 이 브라우저에만
-                  저장되므로, 기기를 바꾸거나 오래 보관하려면 보관함에서 백업 파일을 내려받으세요.
-                </p>
+                <p>제출 후 틀린 문제가 [오답 보관함] 탭에 자동으로 쌓입니다.</p>
               </div>
               <div className="feature-card">
                 <AlertCircle className="feature-icon" size={24} />
